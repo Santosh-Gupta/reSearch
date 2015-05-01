@@ -4,19 +4,20 @@ import os
 from nltk.internals import find_file, find_jar, config_java, java, _java_options
 import nltk
 import unicodedata
+import locations
 
-nltk.internals.config_java("C:/Program Files/Java/jre1.8.0_40/bin/java.exe")
+nltk.internals.config_java(locations.javaPath)
 from nltk.parse import stanford
 
-java_path = "C:/Program Files/Java/jre1.8.0_40/bin/java.exe"
-os.environ['JAVAHOME'] = java_path
+java_path = locations.javaPath
+
+os.environ['JAVAHOME'] = locations.javaPath
+os.environ['STANFORD_PARSER'] = locations.stanfordParser
+os.environ['STANFORD_MODELS'] = locations.stanfordModels
 
 def stan_Parse(sentence_to_parse):
 
-    os.environ['STANFORD_PARSER'] = 'C:/Python34/lwc/stanford-parser-full-2015-01-30/stanford-parser.jar'
-    os.environ['STANFORD_MODELS'] = 'C:/Python34/lwc/stanford-parser-full-2015-01-30/stanford-parser-3.5.1-models.jar'
-
-    parser = stanford.StanfordParser(model_path="C:/Python34/lwc/stanford-parser-full-2015-01-30/edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz")
+    parser = stanford.StanfordParser(model_path=locations.englishPCFG)
    
     print sentence_to_parse
     ready_to_parse = sentence_to_parse.encode("utf-8", "ignore")
@@ -32,3 +33,12 @@ def stan_Parse(sentence_to_parse):
     
     return "passed"
 
+#def stan_Depen(sentence_to_parse):
+#    import StanfordDependencies
+#    parser = stanford.StanfordParser(model_path=locations.englishPCFG)
+#    sentences2 = parser.parse(("bring me a red ball",)) 
+#    
+#    sd = StanfordDependencies.get_instance(backend='subprocess')
+#    print sd.convert_tree(str(sentences2))
+#    
+#    return "passed"

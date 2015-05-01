@@ -1,8 +1,8 @@
 from django.conf import settings
 from django.shortcuts import render, render_to_response, HttpResponseRedirect, Http404
-from aPI import run_query
-from aPItwo import run_tagging
-from stanfordParse import stan_Parse
+from aPIBing import run_query
+from aPITag import run_tagging, tagging_all
+from stanfordParse import stan_Parse #, stan_Depen
 from resultsStats import run_stats
 from django.http import HttpResponse
 from django.template import RequestContext
@@ -28,7 +28,6 @@ def search(request):
             
     bASE_DIR = os.path.dirname(os.path.dirname(__file__))
     hOME_DIRS = (
-    #BASE_DIR+'/templates/',
     os.path.join(bASE_DIR, 'templates', 'home.html'),
     )
     
@@ -41,14 +40,22 @@ def search(request):
         #print type(result_list)
     
     if 'query' in locals():
-        presenttitle = result_list[0].get("title")
+        
+        if len(result_list) > 1:
+            presenttitle = result_list[0].get("title")
+        else:
+            presenttitle = "Error No Search Results"
+            
         senttitle = str(presenttitle)
         #print type(senttitle)
         tagging_result = run_tagging(senttitle) #sends to aPItwo.py to tag the words
+        #tagging_result_all= tagging_all(result_list)
+        parsing_result = stan_Parse(presenttitle)
         
-        parseing_result = stan_Parse(presenttitle)
+        #dependency_result = stan_Depen(presenttitle) not working
         
         stats_result = run_stats(result_list)
+        print "test7"
 
     
     #print type(result_list)
@@ -68,7 +75,6 @@ def get_ip(request):
 		ip = ""
 	return ip
 
-
 #str(user_id)[:11].replace('-', '').lower()
 import uuid
 
@@ -80,8 +86,6 @@ def get_ref_id():
 		get_ref_id()
 	except:
 		return ref_id
-
-
 
 def share(request, ref_id):
 	#print ref_id
@@ -97,8 +101,6 @@ def share(request, ref_id):
 	except:
 		raise Http404
 
-
-
 def home(request):
 	try:
 		join_id = request.session['join_id_ref']
@@ -107,16 +109,9 @@ def home(request):
 		obj = None
 
 	form = JoinForm(request.POST or None)
-	#form = SearchForm(request.POST or None)
-        #print form()
-        #print form.is_valid()
         
-        #test = search(request)
-        #print test
         results3 = search(request)
-        
-        #print test
-        
+
         if form.is_valid():
             new_join = form.save(commit=False)
             search_string = form.cleaned_data['search_string']
@@ -142,4 +137,5 @@ def home(request):
 
 	context = {"form": form}
 	template = "home.html"
+        print "test9"
 	return render(request, template, {"results3": results3, "form": form})
